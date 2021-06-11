@@ -281,6 +281,16 @@ public class ragh implements TalendJob {
 		}
 	}
 
+	public void tFixedFlowInput_1_error(Exception exception, String errorComponent,
+			final java.util.Map<String, Object> globalMap) throws TalendException {
+
+		end_Hash.put(errorComponent, System.currentTimeMillis());
+
+		status = "failure";
+
+		tFixedFlowInput_1_onSubJobError(exception, errorComponent, globalMap);
+	}
+
 	public void tLogRow_1_error(Exception exception, String errorComponent,
 			final java.util.Map<String, Object> globalMap) throws TalendException {
 
@@ -288,7 +298,7 @@ public class ragh implements TalendJob {
 
 		status = "failure";
 
-		tLogRow_1_onSubJobError(exception, errorComponent, globalMap);
+		tFixedFlowInput_1_onSubJobError(exception, errorComponent, globalMap);
 	}
 
 	public void talendJobLog_error(Exception exception, String errorComponent,
@@ -301,7 +311,7 @@ public class ragh implements TalendJob {
 		talendJobLog_onSubJobError(exception, errorComponent, globalMap);
 	}
 
-	public void tLogRow_1_onSubJobError(Exception exception, String errorComponent,
+	public void tFixedFlowInput_1_onSubJobError(Exception exception, String errorComponent,
 			final java.util.Map<String, Object> globalMap) throws TalendException {
 
 		resumeUtil.addLog("SYSTEM_LOG", "NODE:" + errorComponent, "", Thread.currentThread().getId() + "", "FATAL", "",
@@ -377,8 +387,138 @@ public class ragh implements TalendJob {
 		}
 	}
 
-	public void tLogRow_1Process(final java.util.Map<String, Object> globalMap) throws TalendException {
-		globalMap.put("tLogRow_1_SUBPROCESS_STATE", 0);
+	public static class row1Struct implements routines.system.IPersistableRow<row1Struct> {
+		final static byte[] commonByteArrayLock_TEST_JENKINS_ragh = new byte[0];
+		static byte[] commonByteArray_TEST_JENKINS_ragh = new byte[0];
+
+		public String newColumn;
+
+		public String getNewColumn() {
+			return this.newColumn;
+		}
+
+		private String readString(ObjectInputStream dis) throws IOException {
+			String strReturn = null;
+			int length = 0;
+			length = dis.readInt();
+			if (length == -1) {
+				strReturn = null;
+			} else {
+				if (length > commonByteArray_TEST_JENKINS_ragh.length) {
+					if (length < 1024 && commonByteArray_TEST_JENKINS_ragh.length == 0) {
+						commonByteArray_TEST_JENKINS_ragh = new byte[1024];
+					} else {
+						commonByteArray_TEST_JENKINS_ragh = new byte[2 * length];
+					}
+				}
+				dis.readFully(commonByteArray_TEST_JENKINS_ragh, 0, length);
+				strReturn = new String(commonByteArray_TEST_JENKINS_ragh, 0, length, utf8Charset);
+			}
+			return strReturn;
+		}
+
+		private void writeString(String str, ObjectOutputStream dos) throws IOException {
+			if (str == null) {
+				dos.writeInt(-1);
+			} else {
+				byte[] byteArray = str.getBytes(utf8Charset);
+				dos.writeInt(byteArray.length);
+				dos.write(byteArray);
+			}
+		}
+
+		public void readData(ObjectInputStream dis) {
+
+			synchronized (commonByteArrayLock_TEST_JENKINS_ragh) {
+
+				try {
+
+					int length = 0;
+
+					this.newColumn = readString(dis);
+
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+
+				}
+
+			}
+
+		}
+
+		public void writeData(ObjectOutputStream dos) {
+			try {
+
+				// String
+
+				writeString(this.newColumn, dos);
+
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+
+		}
+
+		public String toString() {
+
+			StringBuilder sb = new StringBuilder();
+			sb.append(super.toString());
+			sb.append("[");
+			sb.append("newColumn=" + newColumn);
+			sb.append("]");
+
+			return sb.toString();
+		}
+
+		public String toLogString() {
+			StringBuilder sb = new StringBuilder();
+
+			if (newColumn == null) {
+				sb.append("<null>");
+			} else {
+				sb.append(newColumn);
+			}
+
+			sb.append("|");
+
+			return sb.toString();
+		}
+
+		/**
+		 * Compare keys
+		 */
+		public int compareTo(row1Struct other) {
+
+			int returnValue = -1;
+
+			return returnValue;
+		}
+
+		private int checkNullsAndCompare(Object object1, Object object2) {
+			int returnValue = 0;
+			if (object1 instanceof Comparable && object2 instanceof Comparable) {
+				returnValue = ((Comparable) object1).compareTo(object2);
+			} else if (object1 != null && object2 != null) {
+				returnValue = compareStrings(object1.toString(), object2.toString());
+			} else if (object1 == null && object2 != null) {
+				returnValue = 1;
+			} else if (object1 != null && object2 == null) {
+				returnValue = -1;
+			} else {
+				returnValue = 0;
+			}
+
+			return returnValue;
+		}
+
+		private int compareStrings(String string1, String string2) {
+			return string1.compareTo(string2);
+		}
+
+	}
+
+	public void tFixedFlowInput_1Process(final java.util.Map<String, Object> globalMap) throws TalendException {
+		globalMap.put("tFixedFlowInput_1_SUBPROCESS_STATE", 0);
 
 		final boolean execStat = this.execStat;
 
@@ -397,6 +537,8 @@ public class ragh implements TalendJob {
 			if (resumeIt || globalResumeTicket) { // start the resume
 				globalResumeTicket = true;
 
+				row1Struct row1 = new row1Struct();
+
 				/**
 				 * [tLogRow_1 begin ] start
 				 */
@@ -405,6 +547,8 @@ public class ragh implements TalendJob {
 				start_Hash.put("tLogRow_1", System.currentTimeMillis());
 
 				currentComponent = "tLogRow_1";
+
+				runStat.updateStatAndLog(execStat, enableLogStash, resourceMap, iterateId, 0, 0, "row1");
 
 				int tos_count_tLogRow_1 = 0;
 
@@ -415,21 +559,11 @@ public class ragh implements TalendJob {
 						public void limitLog4jByte() throws Exception {
 							StringBuilder log4jParamters_tLogRow_1 = new StringBuilder();
 							log4jParamters_tLogRow_1.append("Parameters:");
-							log4jParamters_tLogRow_1.append("BASIC_MODE" + " = " + "true");
+							log4jParamters_tLogRow_1.append("BASIC_MODE" + " = " + "false");
 							log4jParamters_tLogRow_1.append(" | ");
-							log4jParamters_tLogRow_1.append("TABLE_PRINT" + " = " + "false");
+							log4jParamters_tLogRow_1.append("TABLE_PRINT" + " = " + "true");
 							log4jParamters_tLogRow_1.append(" | ");
 							log4jParamters_tLogRow_1.append("VERTICAL" + " = " + "false");
-							log4jParamters_tLogRow_1.append(" | ");
-							log4jParamters_tLogRow_1.append("FIELDSEPARATOR" + " = " + "\"|\"");
-							log4jParamters_tLogRow_1.append(" | ");
-							log4jParamters_tLogRow_1.append("PRINT_HEADER" + " = " + "false");
-							log4jParamters_tLogRow_1.append(" | ");
-							log4jParamters_tLogRow_1.append("PRINT_UNIQUE_NAME" + " = " + "false");
-							log4jParamters_tLogRow_1.append(" | ");
-							log4jParamters_tLogRow_1.append("PRINT_COLNAMES" + " = " + "false");
-							log4jParamters_tLogRow_1.append(" | ");
-							log4jParamters_tLogRow_1.append("USE_FIXED_LENGTH" + " = " + "false");
 							log4jParamters_tLogRow_1.append(" | ");
 							log4jParamters_tLogRow_1.append("PRINT_CONTENT_WITH_LOG4J" + " = " + "true");
 							log4jParamters_tLogRow_1.append(" | ");
@@ -446,9 +580,108 @@ public class ragh implements TalendJob {
 
 				///////////////////////
 
-				final String OUTPUT_FIELD_SEPARATOR_tLogRow_1 = "|";
-				java.io.PrintStream consoleOut_tLogRow_1 = null;
+				class Util_tLogRow_1 {
 
+					String[] des_top = { ".", ".", "-", "+" };
+
+					String[] des_head = { "|=", "=|", "-", "+" };
+
+					String[] des_bottom = { "'", "'", "-", "+" };
+
+					String name = "";
+
+					java.util.List<String[]> list = new java.util.ArrayList<String[]>();
+
+					int[] colLengths = new int[1];
+
+					public void addRow(String[] row) {
+
+						for (int i = 0; i < 1; i++) {
+							if (row[i] != null) {
+								colLengths[i] = Math.max(colLengths[i], row[i].length());
+							}
+						}
+						list.add(row);
+					}
+
+					public void setTableName(String name) {
+
+						this.name = name;
+					}
+
+					public StringBuilder format() {
+
+						StringBuilder sb = new StringBuilder();
+
+						sb.append(print(des_top));
+
+						int totals = 0;
+						for (int i = 0; i < colLengths.length; i++) {
+							totals = totals + colLengths[i];
+						}
+
+						// name
+						sb.append("|");
+						int k = 0;
+						for (k = 0; k < (totals + 0 - name.length()) / 2; k++) {
+							sb.append(' ');
+						}
+						sb.append(name);
+						for (int i = 0; i < totals + 0 - name.length() - k; i++) {
+							sb.append(' ');
+						}
+						sb.append("|\n");
+
+						// head and rows
+						sb.append(print(des_head));
+						for (int i = 0; i < list.size(); i++) {
+
+							String[] row = list.get(i);
+
+							java.util.Formatter formatter = new java.util.Formatter(new StringBuilder());
+
+							StringBuilder sbformat = new StringBuilder();
+							sbformat.append("|%1$-");
+							sbformat.append(colLengths[0]);
+							sbformat.append("s");
+
+							sbformat.append("|\n");
+
+							formatter.format(sbformat.toString(), (Object[]) row);
+
+							sb.append(formatter.toString());
+							if (i == 0)
+								sb.append(print(des_head)); // print the head
+						}
+
+						// end
+						sb.append(print(des_bottom));
+						return sb;
+					}
+
+					private StringBuilder print(String[] fillChars) {
+						StringBuilder sb = new StringBuilder();
+						// first column
+						sb.append(fillChars[0]);
+
+						// last column
+						for (int i = 0; i < colLengths[0] - fillChars[0].length() - fillChars[1].length() + 2; i++) {
+							sb.append(fillChars[2]);
+						}
+						sb.append(fillChars[1]);
+						sb.append("\n");
+						return sb;
+					}
+
+					public boolean isTableEmpty() {
+						if (list.size() > 1)
+							return false;
+						return true;
+					}
+				}
+				Util_tLogRow_1 util_tLogRow_1 = new Util_tLogRow_1();
+				util_tLogRow_1.setTableName("tLogRow_1");
+				util_tLogRow_1.addRow(new String[] { "newColumn", });
 				StringBuilder strBuffer_tLogRow_1 = null;
 				int nb_line_tLogRow_1 = 0;
 ///////////////////////    			
@@ -458,35 +691,139 @@ public class ragh implements TalendJob {
 				 */
 
 				/**
-				 * [tLogRow_1 main ] start
+				 * [tFixedFlowInput_1 begin ] start
 				 */
 
-				currentComponent = "tLogRow_1";
+				ok_Hash.put("tFixedFlowInput_1", false);
+				start_Hash.put("tFixedFlowInput_1", System.currentTimeMillis());
 
-				tos_count_tLogRow_1++;
+				currentComponent = "tFixedFlowInput_1";
+
+				int tos_count_tFixedFlowInput_1 = 0;
+
+				if (enableLogStash) {
+					talendJobLog.addCM("tFixedFlowInput_1", "tFixedFlowInput_1", "tFixedFlowInput");
+					talendJobLogProcess(globalMap);
+				}
+
+				for (int i_tFixedFlowInput_1 = 0; i_tFixedFlowInput_1 < 1; i_tFixedFlowInput_1++) {
+
+					row1.newColumn = "ragh";
+
+					/**
+					 * [tFixedFlowInput_1 begin ] stop
+					 */
+
+					/**
+					 * [tFixedFlowInput_1 main ] start
+					 */
+
+					currentComponent = "tFixedFlowInput_1";
+
+					tos_count_tFixedFlowInput_1++;
+
+					/**
+					 * [tFixedFlowInput_1 main ] stop
+					 */
+
+					/**
+					 * [tFixedFlowInput_1 process_data_begin ] start
+					 */
+
+					currentComponent = "tFixedFlowInput_1";
+
+					/**
+					 * [tFixedFlowInput_1 process_data_begin ] stop
+					 */
+
+					/**
+					 * [tLogRow_1 main ] start
+					 */
+
+					currentComponent = "tLogRow_1";
+
+					if (runStat.update(execStat, enableLogStash, iterateId, 1, 1
+
+							, "row1", "tFixedFlowInput_1", "tFixedFlowInput_1", "tFixedFlowInput", "tLogRow_1",
+							"tLogRow_1", "tLogRow"
+
+					)) {
+						talendJobLogProcess(globalMap);
+					}
+
+					if (log.isTraceEnabled()) {
+						log.trace("row1 - " + (row1 == null ? "" : row1.toLogString()));
+					}
+
+///////////////////////		
+
+					String[] row_tLogRow_1 = new String[1];
+
+					if (row1.newColumn != null) { //
+						row_tLogRow_1[0] = String.valueOf(row1.newColumn);
+
+					} //
+
+					util_tLogRow_1.addRow(row_tLogRow_1);
+					nb_line_tLogRow_1++;
+					log.info("tLogRow_1 - Content of row " + nb_line_tLogRow_1 + ": "
+							+ TalendString.unionString("|", row_tLogRow_1));
+//////
+
+//////                    
+
+///////////////////////    			
+
+					tos_count_tLogRow_1++;
+
+					/**
+					 * [tLogRow_1 main ] stop
+					 */
+
+					/**
+					 * [tLogRow_1 process_data_begin ] start
+					 */
+
+					currentComponent = "tLogRow_1";
+
+					/**
+					 * [tLogRow_1 process_data_begin ] stop
+					 */
+
+					/**
+					 * [tLogRow_1 process_data_end ] start
+					 */
+
+					currentComponent = "tLogRow_1";
+
+					/**
+					 * [tLogRow_1 process_data_end ] stop
+					 */
+
+					/**
+					 * [tFixedFlowInput_1 process_data_end ] start
+					 */
+
+					currentComponent = "tFixedFlowInput_1";
+
+					/**
+					 * [tFixedFlowInput_1 process_data_end ] stop
+					 */
+
+					/**
+					 * [tFixedFlowInput_1 end ] start
+					 */
+
+					currentComponent = "tFixedFlowInput_1";
+
+				}
+				globalMap.put("tFixedFlowInput_1_NB_LINE", 1);
+
+				ok_Hash.put("tFixedFlowInput_1", true);
+				end_Hash.put("tFixedFlowInput_1", System.currentTimeMillis());
 
 				/**
-				 * [tLogRow_1 main ] stop
-				 */
-
-				/**
-				 * [tLogRow_1 process_data_begin ] start
-				 */
-
-				currentComponent = "tLogRow_1";
-
-				/**
-				 * [tLogRow_1 process_data_begin ] stop
-				 */
-
-				/**
-				 * [tLogRow_1 process_data_end ] start
-				 */
-
-				currentComponent = "tLogRow_1";
-
-				/**
-				 * [tLogRow_1 process_data_end ] stop
+				 * [tFixedFlowInput_1 end ] stop
 				 */
 
 				/**
@@ -496,12 +833,29 @@ public class ragh implements TalendJob {
 				currentComponent = "tLogRow_1";
 
 //////
+
+				java.io.PrintStream consoleOut_tLogRow_1 = null;
+				if (globalMap.get("tLogRow_CONSOLE") != null) {
+					consoleOut_tLogRow_1 = (java.io.PrintStream) globalMap.get("tLogRow_CONSOLE");
+				} else {
+					consoleOut_tLogRow_1 = new java.io.PrintStream(new java.io.BufferedOutputStream(System.out));
+					globalMap.put("tLogRow_CONSOLE", consoleOut_tLogRow_1);
+				}
+
+				consoleOut_tLogRow_1.println(util_tLogRow_1.format().toString());
+				consoleOut_tLogRow_1.flush();
 //////
 				globalMap.put("tLogRow_1_NB_LINE", nb_line_tLogRow_1);
 				if (log.isInfoEnabled())
 					log.info("tLogRow_1 - " + ("Printed row count: ") + (nb_line_tLogRow_1) + ("."));
 
 ///////////////////////    			
+
+				if (runStat.updateStatAndLog(execStat, enableLogStash, resourceMap, iterateId, "row1", 2, 0,
+						"tFixedFlowInput_1", "tFixedFlowInput_1", "tFixedFlowInput", "tLogRow_1", "tLogRow_1",
+						"tLogRow", "output")) {
+					talendJobLogProcess(globalMap);
+				}
 
 				if (log.isDebugEnabled())
 					log.debug("tLogRow_1 - " + ("Done."));
@@ -512,6 +866,7 @@ public class ragh implements TalendJob {
 				/**
 				 * [tLogRow_1 end ] stop
 				 */
+
 			} // end the resume
 
 		} catch (java.lang.Exception e) {
@@ -525,10 +880,22 @@ public class ragh implements TalendJob {
 			throw te;
 		} catch (java.lang.Error error) {
 
+			runStat.stopThreadStat();
+
 			throw error;
 		} finally {
 
 			try {
+
+				/**
+				 * [tFixedFlowInput_1 finally ] start
+				 */
+
+				currentComponent = "tFixedFlowInput_1";
+
+				/**
+				 * [tFixedFlowInput_1 finally ] stop
+				 */
 
 				/**
 				 * [tLogRow_1 finally ] start
@@ -539,6 +906,7 @@ public class ragh implements TalendJob {
 				/**
 				 * [tLogRow_1 finally ] stop
 				 */
+
 			} catch (java.lang.Exception e) {
 				// ignore
 			} catch (java.lang.Error error) {
@@ -547,7 +915,7 @@ public class ragh implements TalendJob {
 			resourceMap = null;
 		}
 
-		globalMap.put("tLogRow_1_SUBPROCESS_STATE", 1);
+		globalMap.put("tFixedFlowInput_1_SUBPROCESS_STATE", 1);
 	}
 
 	public void talendJobLogProcess(final java.util.Map<String, Object> globalMap) throws TalendException {
@@ -697,6 +1065,8 @@ public class ragh implements TalendJob {
 
 			throw te;
 		} catch (java.lang.Error error) {
+
+			runStat.stopThreadStat();
 
 			throw error;
 		} finally {
@@ -877,6 +1247,17 @@ public class ragh implements TalendJob {
 			isChildJob = true;
 		}
 
+		if (portStats != null) {
+			// portStats = -1; //for testing
+			if (portStats < 0 || portStats > 65535) {
+				// issue:10869, the portStats is invalid, so this client socket can't open
+				System.err.println("The statistics socket port " + portStats + " is invalid.");
+				execStat = false;
+			}
+		} else {
+			execStat = false;
+		}
+
 		boolean inOSGi = routines.system.BundleUtils.inOSGi();
 
 		if (inOSGi) {
@@ -950,6 +1331,17 @@ public class ragh implements TalendJob {
 		resumeUtil.addLog("JOB_STARTED", "JOB:" + jobName, parent_part_launcher, Thread.currentThread().getId() + "",
 				"", "", "", "", resumeUtil.convertToJsonText(context, parametersToEncrypt));
 
+		if (execStat) {
+			try {
+				runStat.openSocket(!isChildJob);
+				runStat.setAllPID(rootPid, fatherPid, pid, jobName);
+				runStat.startThreadStat(clientHost, portStats);
+				runStat.updateStatOnJob(RunStat.JOBSTART, fatherNode);
+			} catch (java.io.IOException ioException) {
+				ioException.printStackTrace();
+			}
+		}
+
 		java.util.concurrent.ConcurrentHashMap<Object, Object> concurrentHashMap = new java.util.concurrent.ConcurrentHashMap<Object, Object>();
 		globalMap.put("concurrentHashMap", concurrentHashMap);
 
@@ -972,6 +1364,19 @@ public class ragh implements TalendJob {
 
 		this.globalResumeTicket = false;// to run others jobs
 
+		try {
+			errorCode = null;
+			tFixedFlowInput_1Process(globalMap);
+			if (!"failure".equals(status)) {
+				status = "end";
+			}
+		} catch (TalendException e_tFixedFlowInput_1) {
+			globalMap.put("tFixedFlowInput_1_SUBPROCESS_STATE", -1);
+
+			e_tFixedFlowInput_1.printStackTrace();
+
+		}
+
 		this.globalResumeTicket = true;// to run tPostJob
 
 		end = System.currentTimeMillis();
@@ -993,6 +1398,10 @@ public class ragh implements TalendJob {
 			}
 		}
 
+		if (execStat) {
+			runStat.updateStatOnJob(RunStat.JOBEND, fatherNode);
+			runStat.stopThreadStat();
+		}
 		int returnCode = 0;
 
 		if (errorCode == null) {
@@ -1127,6 +1536,6 @@ public class ragh implements TalendJob {
 	ResumeUtil resumeUtil = null;
 }
 /************************************************************************************************
- * 40359 characters generated by Talend Cloud Real-Time Big Data Platform on the
- * 11 June, 2021 8:18:53 PM IST
+ * 52074 characters generated by Talend Cloud Real-Time Big Data Platform on the
+ * 11 June, 2021 9:13:08 PM IST
  ************************************************************************************************/
